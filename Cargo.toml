@@ -1,0 +1,25 @@
+[package]
+name = "coyote"
+description = "Protocol support for DG-LAB Coyote 3 devices"
+keywords = ["e-stim"]
+version = "0.1.0"
+edition = "2024"
+license-file = "LICENSE"
+
+[dependencies]
+btleplug = "0.12.0"
+thiserror = { version = "2.0.18", default-features = false }
+tracing = { version = "0.1.44", default-features = false, features = ["attributes"] }
+uuid = { version = "1.22.0", default-features = false }
+
+[lints]
+rust.missing-docs = "deny"
+rustdoc.broken_intra_doc_links = "deny"
+clippy.pedantic = "warn"
+clippy.nursery = "warn"
+
+[dev-dependencies]
+insta = "1.46.3"
+rstest = "0.26.1"
+tokio = { version = "1.50.0", features = ["macros", "rt-multi-thread"] }
+tracing-subscriber = "0.3.23"

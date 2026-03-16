@@ -1,0 +1,5 @@
+---
+source: src/messages.rs
+expression: "format!(\"0x{encoded}\")"
+---
+0xb0e1656966676869323334315e5f60612a2b2c29
