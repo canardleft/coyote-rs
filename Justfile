@@ -1,17 +1,19 @@
 #!/bin/env -S just --justfile
 
+CARGO_ARGS := "--locked"
+
 # verify all of the code
 check-and-test: test check
 
 # run test suite
 test:
-    cargo nextest run --all-features --all-targets
-    cargo test --doc --all-features
+    RUST_LOG=debug cargo nextest run {{ CARGO_ARGS }} --all-features --all-targets
+    RUST_LOG=debug cargo test {{ CARGO_ARGS }} --doc --all-features
 alias t := test
 
 # generate library documentation
 doc: 
-    cargo doc --document-private-items
+    cargo doc {{ CARGO_ARGS }} --document-private-items
 alias d := doc
 
 # run static checks
@@ -20,7 +22,7 @@ alias c := check
 
 # check code for errors/warnings
 check-code:
-    cargo check
+    cargo clippy {{ CARGO_ARGS }}
 
 # check formatting
 check-fmt:
@@ -30,7 +32,7 @@ check-fmt:
 # check dependencies
 check-deps:
     cargo machete
-    cargo deny check advisories
+    cargo deny {{ CARGO_ARGS }} check advisories
 
 # check metadata
 check-meta:
@@ -39,8 +41,8 @@ check-meta:
 
 # check documentation
 check-doc:
-    cargo doc --no-deps
+    cargo doc {{ CARGO_ARGS }} --no-deps
 
 # run an example
 run-example example="connecting":
-    RUST_LOG=debug cargo run --example={{example}}
+    RUST_LOG=debug cargo run {{ CARGO_ARGS }} --example={{example}}
