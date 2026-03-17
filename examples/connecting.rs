@@ -14,6 +14,8 @@ use std::time::Duration;
 use tokio::time;
 use tracing::info;
 
+const CONN_WAIT: Duration = Duration::from_secs(2);
+
 #[tokio::main]
 #[tracing::instrument]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -28,7 +30,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // start scanning for devices
     info!("searching for coyote 3 devices");
     central.start_scan(ScanFilter::default()).await?;
-    time::sleep(Duration::from_secs(2)).await;
+    time::sleep(CONN_WAIT).await;
 
     // figure out which connected peripheral is our coyote 3
     let mut peripheral = None;
@@ -47,7 +49,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             break;
         }
     }
-    let peripheral = peripheral.expect("couldn't find connected coyote 3 device");
+    let Some(peripheral) = peripheral else {
+        panic!("couldn't find connected coyote 3 device after {CONN_WAIT:?}");
+    };
+
     peripheral
         .connect()
         .await
@@ -74,29 +79,33 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .expect("error initialising device");
 
     loop {
-        pulse_host
-            .write_values(ChannelValues {
-                sequence_number: 0,
-                strength_change: StrengthChange::Set {
-                    channel_a: 50.try_into().unwrap(),
-                    channel_b: 50.try_into().unwrap(),
+        info!("writing to device");
+        // use tokio::join to keep our 100ms interval more accurate
+        tokio::join!(
+            pulse_host.write_values(
+                ChannelValues {
+                    strength_change: StrengthChange::Set {
+                        channel_a: 50.try_into().unwrap(),
+                        channel_b: 50.try_into().unwrap(),
+                    },
+                    channel_a_waveform: [
+                        (100, 50).try_into().unwrap(),
+                        (120, 50).try_into().unwrap(),
+                        (100, 50).try_into().unwrap(),
+                        (120, 50).try_into().unwrap(),
+                    ],
+                    channel_b_waveform: [
+                        (100, 50).try_into().unwrap(),
+                        (120, 50).try_into().unwrap(),
+                        (100, 50).try_into().unwrap(),
+                        (120, 50).try_into().unwrap(),
+                    ],
                 },
-                channel_a_waveform: [
-                    (100, 50).try_into().unwrap(),
-                    (120, 50).try_into().unwrap(),
-                    (100, 50).try_into().unwrap(),
-                    (120, 50).try_into().unwrap(),
-                ],
-                channel_b_waveform: [
-                    (100, 50).try_into().unwrap(),
-                    (120, 50).try_into().unwrap(),
-                    (100, 50).try_into().unwrap(),
-                    (120, 50).try_into().unwrap(),
-                ],
-            })
-            .await
-            .expect("failed to set channel values");
-
-        time::sleep(Duration::from_millis(100)).await;
+                0
+            ),
+            time::sleep(Duration::from_millis(100)),
+        )
+        .0
+        .expect("failed to write to device");
     }
 }

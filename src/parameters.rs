@@ -23,10 +23,6 @@ pub struct ValueError<T> {
 /// Should be written every 100ms.
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub struct ChannelValues {
-    /// Sequence number of this command.
-    ///
-    /// Top 4 bits are ignored.
-    pub sequence_number: u8,
     /// Change in strength for both channels.
     pub strength_change: StrengthChange,
     /// Waveform for 100ms on channel A.

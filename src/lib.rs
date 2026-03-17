@@ -4,8 +4,11 @@ use btleplug::api::{Characteristic, Peripheral, PeripheralProperties};
 use tracing::{Span, debug, instrument, warn};
 use uuid::Uuid;
 
-mod messages;
+mod messaging;
 pub mod parameters;
+
+pub use messaging::PulseStrengthResponse;
+pub use parameters::{ChannelLimits, ChannelValues};
 
 /// Error thrown by operations against a [`PulseHost3`].
 #[derive(Debug, thiserror::Error)]
@@ -131,13 +134,17 @@ impl<P: Peripheral> PulseHost3<P> {
     }
 
     /// Write channel values to the device.
+    ///
+    /// `sequence_number` is the sequence number of this command, it's used as an ID.
+    /// The top 4 bits of it are ignored.
     #[instrument]
     pub async fn write_values(
         &self,
         values: parameters::ChannelValues,
-    ) -> Result<messages::PulseStrengthResponse, Error> {
+        sequence_number: u8,
+    ) -> Result<messaging::PulseStrengthResponse, Error> {
         // send the command
-        let encoded_command = messages::SetValuesCommand(values).encode();
+        let encoded_command = messaging::encode_values_command(&values, sequence_number);
         debug!(?encoded_command, "writing B0 command");
         self.peripheral
             .write(
@@ -151,7 +158,7 @@ impl<P: Peripheral> PulseHost3<P> {
         let raw_resp = self.peripheral.read(&self.resp_characteristic).await?;
         debug!(response = ?raw_resp.as_slice(), "read B1 response");
         let response =
-            messages::PulseStrengthResponse::try_decode(raw_resp.as_slice()).map_err(|msg| {
+            messaging::PulseStrengthResponse::try_decode(raw_resp.as_slice()).map_err(|msg| {
                 Error::DecodeError {
                     msg,
                     value: raw_resp.into_boxed_slice(),
@@ -164,7 +171,7 @@ impl<P: Peripheral> PulseHost3<P> {
     /// Set the channel limits on this device.
     #[instrument]
     pub async fn set_limits(&self, limits: parameters::ChannelLimits) -> Result<(), Error> {
-        let encoded_command = messages::SetLimitsCommand(limits.clone()).encode();
+        let encoded_command = messaging::encode_limits_command(&limits);
         debug!(?encoded_command, "setting limits");
         self.peripheral
             .write(
@@ -184,10 +191,10 @@ impl<P> core::fmt::Debug for PulseHost3<P> {
             "Coyote 3.0 Pulse Host {{ addr: {}, name: {:?}{} }}",
             self.perip_properties.address,
             self.perip_properties.local_name,
-            if !Self::peripheral_matches(&self.perip_properties) {
-                " (mismatch!)"
-            } else {
+            if Self::peripheral_matches(&self.perip_properties) {
                 ""
+            } else {
+                " (mismatch!)"
             }
         )?;
         Ok(())
