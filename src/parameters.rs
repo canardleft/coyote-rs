@@ -109,7 +109,7 @@ pub type ChannelWaveform = [ChannelWaveformSegment; 4];
 /// Has a `TryFrom` impl against byte pairs:
 ///
 /// ```
-/// # use coyote::parameters::ChannelWaveformSegment;
+/// # use coyote_estim::parameters::ChannelWaveformSegment;
 /// let segment: ChannelWaveformSegment = (10, 100).try_into().unwrap();
 /// ```
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
@@ -164,9 +164,9 @@ impl TryFrom<(u8, u8)> for ChannelWaveformSegment {
 /// # Example
 ///
 /// ```
-/// use coyote::parameters::{ChannelLimits, ChannelLimit};
+/// use coyote_estim::parameters::{ChannelLimits, ChannelLimit};
 ///
-/// let limits = coyote::parameters::ChannelLimits {
+/// let limits = coyote_estim::parameters::ChannelLimits {
 ///     channel_a: ChannelLimit {
 ///         upper_limit: 100.try_into().unwrap(),
 ///         frequency_balance: 100,

@@ -7,8 +7,8 @@
 
 use btleplug::api::{Central, Manager as _, Peripheral as _, ScanFilter};
 use btleplug::platform::{Manager, Peripheral};
-use coyote::PulseHost3;
-use coyote::parameters::{ChannelLimit, ChannelLimits, ChannelValues, StrengthChange};
+use coyote_estim::PulseHost3;
+use coyote_estim::parameters::{ChannelLimit, ChannelLimits, ChannelValues, StrengthChange};
 use std::error::Error;
 use std::time::Duration;
 use tokio::time;
