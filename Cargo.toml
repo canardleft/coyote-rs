@@ -1,6 +1,6 @@
 [package]
-name = "coyote"
-description = "Protocol support for DG-LAB Coyote 3 devices"
+name = "coyote-estim"
+description = "Protocol support for DG-LAB Coyote 3 e-stim devices"
 keywords = ["e-stim"]
 version = "0.1.0"
 edition = "2024"
