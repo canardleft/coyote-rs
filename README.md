@@ -1,5 +1,6 @@
 # DG-LAB Coyote Rust Drivers
 
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/canardleft/coyote-rs/check-and-test.yml?branch=main)
 [![Hippocratic License HL3-BDS-CL-ECO-EXTR-FFD-LAW-MIL-SV](https://img.shields.io/static/v1?label=Hippocratic%20License&message=HL3-BDS-CL-ECO-EXTR-FFD-LAW-MIL-SV&labelColor=5e2751&color=bc8c3d)](https://firstdonoharm.dev/version/3/0/bds-cl-eco-extr-ffd-law-mil-sv.html)
 
 Simple driver and protocol implementation for [DG-LAB's Coyote](https://www.dungeon-lab.com/e-stim-unit3.0.php) [e-stim](https://en.wikipedia.org/wiki/E-stim) kits.

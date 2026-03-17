@@ -1,0 +1,41 @@
+name: Run static checks and tests
+on: [push, pull_request]
+permissions:
+  checks: write
+jobs:
+  run-all-tests-and-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v5
+      - name: Install system deps
+        run: sudo apt install libdbus-1-dev pkg-config
+      - name: Install rust
+        run: rustup default stable
+      - name: Enable rust caching
+        uses: Swatinem/rust-cache@v2
+      - name: Install tools with cargo
+        run: >
+          cargo install --locked
+          cargo-deny
+          cargo-machete
+          cargo-nextest
+          just
+          lychee
+          taplo-cli
+      - name: Install codespell
+        run: pip install codespell
+      - name: Run tests
+        run: cargo nextest run --profile ci
+      - name: Publish test report
+        uses: mikepenz/action-junit-report@v6
+        if: success() || failure() # always run even if the previous step fails
+        with:
+          report_paths: 'target/nextest/ci/junit.xml'
+      - name: Run Clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features
+      - name: Run static checks
+        run: just check
